@@ -9,10 +9,56 @@
 </head>
 <body>
 
-{# ── ARTICLE METADATA: single column, full width ── #}
+{# ── FIRST-PAGE JOURNAL HEADER BAND ── #}
+<div class="first-page-header-band">
+    <div class="header-band-top">
+        <div class="header-band-left">
+            <div class="header-band-journal">{{ article.front.journal_meta.journal_title }}</div>
+            <div class="header-band-abbrev">{{ article.front.journal_meta.abbrev_journal_title }}</div>
+            <div class="header-band-issn">
+                {% for issn in article.front.journal_meta.issns %}
+                    ISSN {{ issn.value }} ({{ issn.pub_type }})
+                    {% if not loop.last %}&nbsp;{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="header-band-right">
+            <div class="header-band-publisher">{{ article.front.journal_meta.publisher }}</div>
+            <div class="header-band-doi">
+                {% for aid in article.front.article_ids %}
+                    {% if aid.id_type == 'doi' %}
+                        <a class="doi-link" href="https://doi.org/{{ aid.value }}">https://doi.org/{{ aid.value }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── ARTICLE METADATA: single column ── #}
 <div class="single-column-front">
 {% include 'components/header.html' %}
 {% include 'components/abstract.html' %}
+</div>
+
+{# ── FIRST-PAGE FOOTER: copyright, license, publisher note ── #}
+<div class="first-page-footer">
+    <div class="first-page-footer-rule"></div>
+    <div class="first-page-footer-text">
+        {% if article.front.copyright %}
+        <span>{{ article.front.copyright.statement }}</span>
+        {% endif %}
+        {% if article.front.copyright and article.front.copyright.license_nodes %}
+        <span>{% with para={'content': article.front.copyright.license_nodes} %}{% include 'components/_inline.html' %}{% endwith %}</span>
+        {% elif article.front.copyright and article.front.copyright.license_text %}
+        <span>{{ article.front.copyright.license_text }}</span>
+        {% endif %}
+        {% for fg in article.back.footnotes %}
+            {% for para in fg.paragraphs %}
+            <span>{% with para={'content': para} %}{% include 'components/_inline.html' %}{% endwith %}</span>
+            {% endfor %}
+        {% endfor %}
+    </div>
 </div>
 
 {# ── BODY + BACK SECTIONS + REFERENCES: two columns ── #}

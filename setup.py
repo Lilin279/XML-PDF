@@ -20,6 +20,7 @@ setup(
     },
     install_requires=[
         "lxml>=5.0.0",
+        "Pillow>=10.0.0",
         "weasyprint>=60.0",
         "xhtml2pdf>=0.2.0",
         "Jinja2>=3.1.0",

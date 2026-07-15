@@ -73,7 +73,14 @@ class FigureResolver:
                 if found.name.lower() == filename.lower():
                     return found
 
-            # Strategy 5: Search inside zip files
+            # Strategy 5: Fuzzy filename match (fig-01.jpg vs fig1.jpg)
+            for found in search_dir.rglob('*'):
+                if found.is_file() and self._fuzzy_match(
+                    found.name.lower(), filename.lower()
+                ):
+                    return found
+
+            # Strategy 6: Search inside zip files
             for zip_path in search_dir.glob("*.zip"):
                 try:
                     with zipfile.ZipFile(zip_path, 'r') as zf:
@@ -129,17 +136,49 @@ class FigureResolver:
         return self._file_to_data_uri(path)
 
     @staticmethod
-    def _file_to_data_uri(file_path: Path) -> str:
-        """Convert an image file to a base64 data URI."""
-        mime_type, _ = mimetypes.guess_type(str(file_path))
-        if mime_type is None:
-            # Default to image/jpeg
-            mime_type = 'image/jpeg'
+    def _fuzzy_match(actual: str, expected: str) -> bool:
+        """Fuzzy filename match: fig-01.jpg matches fig1.jpg."""
+        import re
+        # Normalize: strip hyphens, zero-padding, underscores
+        def norm(s):
+            s = re.sub(r'[-_]', '', s)           # fig-01 -> fig01
+            s = re.sub(r'0+(\d+)', r'\1', s)      # fig01 -> fig1
+            return s
+        return norm(actual) == norm(expected)
 
-        with open(file_path, 'rb') as f:
-            encoded = base64.b64encode(f.read()).decode('ascii')
+    @staticmethod
+    def _file_to_data_uri(file_path: Path, max_width: int = 1600,
+                          jpeg_quality: int = 85) -> str:
+        """Convert an image file to a compressed base64 data URI.
 
-        return f'data:{mime_type};base64,{encoded}'
+        Resizes large images and recompresses to keep PDF size manageable.
+        """
+        from PIL import Image
+        import io
+
+        img = Image.open(file_path)
+
+        # Convert RGBA/P to RGB for JPEG compression
+        if img.mode in ('RGBA', 'P', 'LA'):
+            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+            img = rgb_img
+
+        # Resize if wider than max_width
+        if img.width > max_width:
+            ratio = max_width / img.width
+            new_size = (max_width, int(img.height * ratio))
+            img = img.resize(new_size, Image.LANCZOS)
+
+        # Compress to JPEG in memory
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=jpeg_quality, optimize=True)
+        compressed = buf.getvalue()
+
+        encoded = base64.b64encode(compressed).decode('ascii')
+        return f'data:image/jpeg;base64,{encoded}'
 
 
 def auto_detect_figure_dir(xml_path) -> Optional[Path]:

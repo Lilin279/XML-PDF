@@ -13,7 +13,8 @@ from .models import (
     TableFootnote, Figure, Reference, ReferenceCitation,
     FootnoteGroup, SupplementaryMaterial,
     InlineText, InlineItalic, InlineBold, InlineSup, InlineSub,
-    InlineXref, InlineFormula, InlineBreak, InlineExtLink, InlineNode,
+    InlineXref, InlineFormula, InlineBreak, InlineExtLink,
+    InlineGraphic, InlineNode,
 )
 
 # Namespaces used in JATS XML
@@ -450,6 +451,10 @@ class JATSParser:
                 if text == href or not text:
                     text = href
                 nodes.append(InlineExtLink(href=href, text=text))
+            elif tag in ('graphic', 'inline-graphic'):
+                href = _attr(child, '{http://www.w3.org/1999/xlink}href', '')
+                if href:
+                    nodes.append(InlineGraphic(href=href))
             elif tag == 'mml:math':
                 mathml_str = etree.tostring(child, encoding='unicode')
                 nodes.append(InlineFormula(mathml=mathml_str))
@@ -488,6 +493,8 @@ class JATSParser:
                 result.append("[Formula]")
             elif isinstance(node, InlineExtLink):
                 result.append(node.text)
+            elif isinstance(node, InlineGraphic):
+                result.append("[Image]")
             elif isinstance(node, InlineBreak):
                 result.append(" ")
         return ''.join(result)
@@ -628,12 +635,30 @@ class JATSParser:
                 label=_text(ref_el.find('label'))
             )
             citation_el = ref_el.find('element-citation')
+            if citation_el is None:
+                citation_el = ref_el.find('mixed-citation')
             if citation_el is not None:
                 ref.citation = self._parse_citation(citation_el)
             refs.append(ref)
         return refs
 
     def _parse_citation(self, cit_el) -> ReferenceCitation:
+        # Check if this is mixed-citation with raw text (no structured children)
+        tag = etree.QName(cit_el).localname if hasattr(cit_el, 'tag') else ''
+        if tag == 'mixed-citation':
+            # mixed-citation may have raw text or structured children
+            has_children = any(
+                etree.QName(c).localname not in ('', None)
+                for c in cit_el if hasattr(c, 'tag')
+            )
+            if not has_children and cit_el.text and cit_el.text.strip():
+                # Pure text citation — store as raw
+                cit = ReferenceCitation(
+                    publication_type='journal',
+                    comment=cit_el.text.strip(),
+                )
+                return cit
+
         cit = ReferenceCitation(
             publication_type=_attr(cit_el, 'publication-type', 'journal'),
             article_title=_text(cit_el.find('article-title')),

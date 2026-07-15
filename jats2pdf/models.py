@@ -63,8 +63,15 @@ class InlineExtLink:
     text: str = ""
 
 
+@dataclass
+class InlineGraphic:
+    """Inline graphic/image within a paragraph or table cell."""
+    href: str  # xlink:href
+
+
 InlineNode = Union[InlineText, InlineItalic, InlineBold, InlineSup, InlineSub,
-                   InlineXref, InlineFormula, InlineBreak, InlineExtLink]
+                   InlineXref, InlineFormula, InlineBreak, InlineExtLink,
+                   InlineGraphic]
 
 
 # ── Article Metadata ──

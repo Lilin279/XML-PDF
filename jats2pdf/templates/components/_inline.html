@@ -25,6 +25,12 @@
         {{ node.mathml | safe }}
     {%- elif node.__class__.__name__ == 'InlineExtLink' -%}
         <a class="ext-link" href="{{ node.href }}">{{ node.text }}</a>
+    {%- elif node.__class__.__name__ == 'InlineGraphic' -%}
+        {%- if figure_uris and node.href in figure_uris -%}
+            <img class="inline-graphic" src="{{ figure_uris[node.href] }}" alt="graphic" />
+        {%- else -%}
+            <span class="inline-graphic-missing">[Image: {{ node.href }}]</span>
+        {%- endif -%}
     {%- elif node.__class__.__name__ == 'InlineBreak' -%}
         <br>
     {%- endif -%}

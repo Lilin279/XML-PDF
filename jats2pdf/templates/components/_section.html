@@ -26,7 +26,7 @@
             {% endwith %}
         {% elif item[0] == 'table' %}
             {% set table = item[1] %}
-            {% if table.max_columns >= 6 %}
+            {% if table.max_columns >= 12 %}
             <div class="landscape-table-wrap">
                 {% include 'components/table.html' with context %}
             </div>
@@ -53,7 +53,7 @@
         <p>{% include 'components/_inline.html' with context %}</p>
     {% endfor %}
     {% for table in sec.tables %}
-        {% if table.max_columns >= 6 %}
+        {% if table.max_columns >= 12 %}
         <div class="landscape-table-wrap">
             {% include 'components/table.html' with context %}
         </div>

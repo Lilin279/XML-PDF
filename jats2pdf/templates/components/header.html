@@ -35,8 +35,7 @@
 {# ── 3. Authors (superscripts tight, no ORCID) ── #}
 <div class="author-list">
     {% for author in fm.authors %}
-    {% if author.orcid %}<a class="orcid-link" href="{{ author.orcid }}" target="_blank">{% endif %}
-    <span class="author-name">{{ author.given_names }} {{ author.surname }}</span>{% if author.orcid %}</a>{% endif %}
+    <span class="author-name">{{ author.given_names }} {{ author.surname }}</span>{% if author.orcid %}<a class="orcid-icon" href="{{ author.orcid }}" target="_blank" title="ORCID"><span class="orcid-dot">ID</span></a>{% endif %}
     {% if author.aff_refs %}<span class="author-aff-marks">{% for ref in author.aff_refs %}{% for aff in fm.affiliations %}{% if aff.id == ref %}{{ aff.label }}{% endif %}{% endfor %}{% if not loop.last %},{% endif %}{% endfor %}</span>{% endif %}{% if author.is_corresponding %}<span class="author-corresp-mark">,*</span>{% endif %}{% if not loop.last %}<span class="author-separator">, </span>{% endif %}
     {% endfor %}
 </div>

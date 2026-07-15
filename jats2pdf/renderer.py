@@ -191,11 +191,9 @@ class PDFRenderer:
         Chromium supports CSS columns and modern layout.
         Landscape tables are rendered separately and merged via PyPDF2.
         """
-        # Check if there are landscape tables to handle
         if 'class="landscape-table-wrap"' not in html:
             return self._playwright_render_single(html, output_path, 'A4')
 
-        # Split HTML: render segments in portrait/landscape, then merge
         return self._render_with_landscape_tables(html, output_path)
 
     def _playwright_render_single(self, html: str, output_path: str,
@@ -342,11 +340,23 @@ class PDFRenderer:
             if stamp_reader.pages:
                 page.merge_page(stamp_reader.pages[0])
 
-        with open(output_path, 'wb') as f:
+        # Write to temp, then compress to deduplicate fonts across segments
+        temp_merged = output_path.replace('.pdf', '_merged.pdf')
+        with open(temp_merged, 'wb') as f:
             merger.write(f)
 
+        # Re-read and compress to deduplicate resources
+        reader = PdfReader(temp_merged)
+        writer = PdfWriter()
+        for page in reader.pages:
+            page.compress_content_streams()
+            writer.add_page(page)
+
+        with open(output_path, 'wb') as f:
+            writer.write(f)
+
         # Cleanup
-        for p in temp_pdfs:
+        for p in temp_pdfs + [temp_merged]:
             try:
                 os.unlink(p)
             except OSError:
@@ -588,20 +598,95 @@ class PDFRenderer:
         """
         uris = {}
         figures = self._collect_all_figures()
+        unresolved = []
+
         for fig in figures:
             if fig.graphic_href and fig.graphic_href not in uris:
                 uri = self.figure_resolver.resolve_to_data_uri(fig.graphic_href)
                 if uri:
                     uris[fig.graphic_href] = uri
+                else:
+                    unresolved.append(fig.graphic_href)
+
+        # Batch positional fallback: if unresolved count matches available
+        # images in search dirs, match by sorted position
+        if unresolved:
+            self._batch_match_figures(uris, unresolved)
+
         return uris
 
+    def _batch_match_figures(self, uris: dict, unresolved: list):
+        """Fallback: match unresolved hrefs to unused images by position."""
+        import re
+        from pathlib import Path as _Path
+
+        # Collect all available image files from search dirs
+        available = []
+        for search_dir in self.figure_resolver.search_dirs:
+            if not search_dir.exists():
+                continue
+            for found in search_dir.rglob('*'):
+                if found.is_file() and found.suffix.lower() in ('.jpg', '.jpeg', '.png', '.gif'):
+                    available.append(found)
+
+        if len(available) < len(unresolved):
+            return  # can't match
+
+        # Sort by extracting numbers from FILENAME only (not path)
+        def sort_key(s):
+            name = s.name if isinstance(s, _Path) else _Path(s).name
+            nums = re.findall(r'\d+', name)
+            return [int(n) for n in nums] if nums else [0]
+
+        # Deduplicate by filename (same file may appear in multiple search dirs)
+        seen = set()
+        unique_available = []
+        for a in available:
+            if a.name.lower() not in seen:
+                seen.add(a.name.lower())
+                unique_available.append(a)
+        available = unique_available
+        available.sort(key=sort_key)
+
+        # Exclude files already matched to resolved hrefs (exact + fuzzy)
+        remaining = []
+        for a in available:
+            matched = False
+            for href in uris:
+                expected = _Path(href).name.lower()
+                if (a.name.lower() == expected
+                        or self.figure_resolver._fuzzy_match(a.name.lower(), expected)):
+                    matched = True
+                    break
+            if not matched:
+                remaining.append(a)
+
+        remaining.sort(key=sort_key)
+        unresolved_sorted = sorted(set(unresolved), key=sort_key)
+
+        if len(remaining) >= len(unresolved_sorted):
+            for i, href in enumerate(unresolved_sorted):
+                uri = self.figure_resolver._file_to_data_uri(remaining[i])
+                uris[href] = uri
+
     def _collect_all_figures(self) -> list:
-        """Collect all figures from body and back matter."""
+        """Collect all figures from body and back matter, including inline graphics."""
         figures = []
 
         def walk_sections(sections):
             for sec in sections:
                 figures.extend(sec.figures)
+                # Also collect InlineGraphic from table cells
+                for table in sec.tables:
+                    if table.table:
+                        for row in table.table.headers + table.table.body:
+                            for cell in row.cells:
+                                for node in cell.content:
+                                    if hasattr(node, 'href') and node.__class__.__name__ == 'InlineGraphic':
+                                        # Create a temporary figure-like object
+                                        class TempFig:
+                                            graphic_href = node.href
+                                        figures.append(TempFig())
                 walk_sections(sec.sections)
 
         walk_sections(self.article.body.sections)

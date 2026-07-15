@@ -8,6 +8,10 @@
     <div class="ref-entry">
         <span class="ref-label">{{ ref.label }}</span>
         {% if ref.citation %}
+            {# Raw text citation (mixed-citation without structured children) ── #}
+            {% if ref.citation.comment and not ref.citation.article_title and not ref.citation.source and not ref.citation.year %}
+                {{ ref.citation.comment }}
+            {% else %}
             {# ── Authors ── #}
             {% if ref.citation.authors %}
                 {% for author in ref.citation.authors[:6] %}
@@ -77,6 +81,7 @@
             {% if ref.citation.date_in_citation %}
                 {{ ref.citation.date_in_citation }}
             {% endif %}
+            {% endif %}{# end structured citation vs raw text #}
         {% endif %}
     </div>
     {% endfor %}
