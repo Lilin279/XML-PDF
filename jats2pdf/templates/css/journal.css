@@ -1,0 +1,269 @@
+/* ═══════════════════════════════════════════════════
+   JATS2PDF — Academic Journal CSS
+   IMR Press Journal Style
+   ═══════════════════════════════════════════════════ */
+
+/* ── Page Setup ── */
+@page {
+    size: A4;
+    margin: 2.5cm 2cm 3cm 2cm;
+    @bottom-center {
+        content: counter(page);
+        font-family: "Times New Roman", serif;
+        font-size: 10pt;
+    }
+}
+
+@page :first {
+    @bottom-center { content: none; }
+}
+
+/* ── Landscape page for wide tables ── */
+@page landscape {
+    size: A4 landscape;
+    margin: 2cm 2.5cm 2cm 2.5cm;
+    @bottom-center {
+        content: counter(page);
+        font-family: "Times New Roman", serif;
+        font-size: 10pt;
+    }
+}
+
+.landscape-page {
+    page: landscape;
+    page-break-before: always;
+    page-break-after: always;
+    width: 100%;
+}
+
+/* ── Two-Column Body Layout ── */
+.two-column-body {
+    column-count: 2;
+    column-gap: 18pt;
+    column-fill: auto;
+    text-align: justify;
+}
+
+/* Span across both columns for wide tables and figures */
+.col-span-all {
+    column-span: all;
+    margin-top: 12pt;
+    margin-bottom: 12pt;
+}
+
+/* Keep headings from breaking at column bottom */
+.two-column-body h2,
+.two-column-body h3,
+.two-column-body h4 {
+    break-after: avoid;
+}
+
+.two-column-body .figure,
+.two-column-body .table-wrap {
+    break-inside: avoid;
+}
+
+/* ── Typography ── */
+body {
+    font-family: "Times New Roman", serif;
+    font-size: 10pt;
+    line-height: 1.6;
+    color: #000;
+    text-align: justify;
+}
+
+/* ── Article Type Badge ── */
+.article-type-badge {
+    text-align: left;
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 14pt;
+}
+
+/* ── Article Title ── */
+.article-title {
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: left;
+    margin: 0 0 16pt 0;
+    line-height: 1.3;
+}
+
+/* ── Authors ── */
+.author-list {
+    text-align: left;
+    font-size: 11pt;
+    margin: 8pt 0;
+    line-height: 1.5;
+}
+.author-name { display: inline; }
+a.orcid-link { color: inherit; text-decoration: none; }
+.author-aff-marks { font-size: 0.75em; vertical-align: super; }
+.author-corresp-mark { font-size: 0.75em; vertical-align: super; }
+.author-separator { display: inline; }
+
+/* ── Affiliations ── */
+.affiliations {
+    font-size: 9pt;
+    margin: 8pt 0;
+    padding-left: 12pt;
+}
+.affiliation { margin: 1pt 0; line-height: 1.4; }
+.aff-label { font-size: 0.75em; vertical-align: super; }
+
+/* ── Correspondence ── */
+.correspondence { font-size: 9pt; margin: 6pt 0; line-height: 1.4; }
+.corresp-label { font-size: 0.75em; vertical-align: super; }
+
+/* ── Editor ── */
+.editor-info { text-align: left; font-size: 10pt; margin: 6pt 0; }
+
+/* ── History / Dates ── */
+.history-dates { font-size: 9pt; margin: 8pt 0; text-align: left; }
+
+/* ── Abstract ── */
+.abstract { margin: 16pt 0 10pt 0; }
+.abstract-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 8pt;
+    text-align: left;
+}
+.abstract-section-title { font-weight: bold; }
+
+/* ── Keywords ── */
+.keywords { margin: 8pt 0 16pt 0; font-size: 10pt; }
+.keyword-label { font-weight: bold; }
+.keyword-list { display: inline; }
+
+/* ── Section Headings ── */
+.section-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 16pt;
+    margin-bottom: 6pt;
+}
+.subsection-title {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-top: 12pt;
+    margin-bottom: 5pt;
+}
+.subsubsection-title {
+    font-size: 10pt;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+}
+
+/* ── Paragraphs ── */
+p {
+    text-align: justify;
+    text-indent: 0;
+    margin: 4pt 0;
+    orphans: 2;
+    widows: 2;
+}
+
+/* ── Three-Line Tables ── */
+.table-wrap {
+    margin: 12pt 0;
+    width: 100%;
+}
+.table-label { font-weight: bold; font-size: 9pt; margin-bottom: 2pt; }
+.table-caption { font-size: 9pt; margin-bottom: 6pt; }
+.table-content {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7pt;
+    margin: 4pt 0;
+    border-top: 1.5pt solid #000;
+    border-bottom: 1.5pt solid #000;
+    table-layout: auto;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+.table-content thead { border-bottom: 0.75pt solid #000; }
+.table-content th {
+    padding: 1pt 3pt;
+    font-weight: bold;
+    font-size: 7pt;
+}
+.table-content td {
+    padding: 1pt 3pt;
+    font-size: 7pt;
+}
+.cell-align-left { text-align: left; }
+.cell-align-center { text-align: center; }
+.cell-align-right { text-align: right; }
+.cell-align-justify { text-align: justify; }
+.table-footnotes { font-size: 6pt; margin-top: 6pt; }
+.table-footnotes p { margin: 1pt 0; }
+
+/* ── Landscape table wrapper ── */
+.landscape-table-wrap {
+    page-break-before: always;
+    page-break-after: always;
+    width: 100%;
+}
+
+/* Named landscape page for WeasyPrint */
+@page landscape {
+    size: A4 landscape;
+    margin: 2cm 2.5cm 2cm 2.5cm;
+    @bottom-center {
+        content: counter(page);
+        font-family: "Times New Roman", serif;
+        font-size: 10pt;
+    }
+}
+
+.landscape-table-wrap {
+    page: landscape;
+}
+
+/* ── Figures ── */
+.figure { margin: 12pt 0; text-align: center; }
+.figure img { max-width: 100%; height: auto; }
+.figure-label { font-weight: bold; text-align: left; font-size: 9pt; margin-bottom: 3pt; }
+.figure-caption { text-align: left; font-size: 9pt; margin-bottom: 6pt; }
+
+/* ── Inline Formatting ── */
+.text-italic { font-style: italic; }
+.text-bold { font-weight: bold; }
+.text-sup { font-size: 0.75em; vertical-align: super; }
+.text-sub { font-size: 0.75em; vertical-align: sub; }
+
+/* ── Cross-references ── */
+.xref { color: #0055aa; text-decoration: none; }
+
+/* ── External Links ── */
+.ext-link { color: #0055aa; text-decoration: none; }
+a { color: #0055aa; text-decoration: none; }
+
+/* ── Math ── */
+.math-inline { display: inline; font-family: "Times New Roman", serif; font-style: italic; }
+.math-display { display: block; text-align: center; margin: 8pt 0; font-style: italic; }
+.math-frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; line-height: 1; }
+.math-frac-num { border-bottom: 0.5pt solid #000; padding: 0 2pt; }
+.math-frac-den { padding: 0 2pt; }
+
+/* ── References ── */
+.ref-list { margin-top: 24pt; }
+.ref-list-title { font-size: 12pt; font-weight: bold; margin-bottom: 12pt; }
+.ref-entry {
+    font-size: 8pt;
+    margin: 2pt 0;
+    text-indent: -14pt;
+    padding-left: 14pt;
+    line-height: 1.4;
+    text-align: left;
+}
+.ref-label { font-weight: bold; margin-right: 4pt; }
+.ref-doi-link { color: #0066cc; text-decoration: none; }
+
+/* ── Back Matter ── */
+.back-section { margin-top: 16pt; }
+.back-section .section-title { font-size: 12pt; font-weight: bold; }
+.back-section p { font-size: 10pt; }

@@ -1,0 +1,7 @@
+{# ── Body Sections (recursive) ── #}
+
+{% for section in article.body.sections %}
+    {% with sec=section %}
+        {% include 'components/_section.html' %}
+    {% endwith %}
+{% endfor %}

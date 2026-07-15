@@ -1,0 +1,76 @@
+{# ── Single Section Renderer (recursive for nested sections) ── #}
+{# Expected context: 'sec' = Section object #}
+
+{% set depth = depth|default(1) %}
+{% set section_id = sec.id %}
+
+{# ── Section Title ── #}
+{% if sec.title %}
+    {% if depth == 1 %}
+    <h2 class="section-title">{{ sec.title }}</h2>
+    {% elif depth == 2 %}
+    <h3 class="subsection-title">{{ sec.title }}</h3>
+    {% elif depth == 3 %}
+    <h4 class="subsubsection-title">{{ sec.title }}</h4>
+    {% else %}
+    <h5 class="sub4-title">{{ sec.title }}</h5>
+    {% endif %}
+{% endif %}
+
+{# ── Children in original XML order ── #}
+{% if sec.children_in_order %}
+    {% for item in sec.children_in_order %}
+        {% if item[0] == 'p' %}
+            {% with para=item[1] %}
+            <p>{% include 'components/_inline.html' with context %}</p>
+            {% endwith %}
+        {% elif item[0] == 'table' %}
+            {% set table = item[1] %}
+            {% if table.max_columns >= 6 %}
+            <div class="landscape-table-wrap">
+                {% include 'components/table.html' with context %}
+            </div>
+            {% else %}
+            <div class="col-span-all">
+                {% include 'components/table.html' with context %}
+            </div>
+            {% endif %}
+        {% elif item[0] == 'fig' %}
+            {% with fig=item[1] %}
+            <div class="col-span-all">
+                {% include 'components/figure.html' with context %}
+            </div>
+            {% endwith %}
+        {% elif item[0] == 'sec' %}
+            {% with sec=item[1], depth=depth+1 %}
+                {% include 'components/_section.html' %}
+            {% endwith %}
+        {% endif %}
+    {% endfor %}
+{% else %}
+    {# ── Fallback: grouped rendering ── #}
+    {% for para in sec.paragraphs %}
+        <p>{% include 'components/_inline.html' with context %}</p>
+    {% endfor %}
+    {% for table in sec.tables %}
+        {% if table.max_columns >= 6 %}
+        <div class="landscape-table-wrap">
+            {% include 'components/table.html' with context %}
+        </div>
+        {% else %}
+        <div class="col-span-all">
+            {% include 'components/table.html' with context %}
+        </div>
+        {% endif %}
+    {% endfor %}
+    {% for fig in sec.figures %}
+    <div class="col-span-all">
+        {% include 'components/figure.html' with context %}
+    </div>
+    {% endfor %}
+    {% for subsec in sec.sections %}
+        {% with sec=subsec, depth=depth+1 %}
+            {% include 'components/_section.html' %}
+        {% endwith %}
+    {% endfor %}
+{% endif %}

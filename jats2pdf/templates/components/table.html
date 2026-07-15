@@ -1,0 +1,69 @@
+{# ── Table Renderer (three-line academic table style) ── #}
+{# Expected context: 'table' = TableWrap object #}
+
+<div class="table-wrap" id="{{ table.id }}">
+
+{# ── Table Label ── #}
+<div class="table-label">{{ table.label }}</div>
+
+{# ── Table Caption ── #}
+{% if table.caption %}
+<div class="table-caption">
+    {% for cap_p in table.caption %}
+    <p>{% with para={'content': cap_p} %}{% include 'components/_inline.html' %}{% endwith %}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Table Content (three-line style) ── #}
+{% if table.table %}
+<table class="table-content">
+    {% if table.table.headers %}
+    <thead>
+        {% for row in table.table.headers %}
+        <tr class="table-header-row">
+            {% for cell in row.cells %}
+            <th
+                {% if cell.colspan > 1 %}colspan="{{ cell.colspan }}"{% endif %}
+                {% if cell.rowspan > 1 %}rowspan="{{ cell.rowspan }}"{% endif %}
+                class="cell-align-{{ cell.align }}"
+                {% if cell.style %}style="{{ cell.style }}"{% endif %}
+            >
+                {% with para={'content': cell.content} %}{% include 'components/_inline.html' %}{% endwith %}
+            </th>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </thead>
+    {% endif %}
+    <tbody>
+        {% for row in table.table.body %}
+        <tr>
+            {% for cell in row.cells %}
+            <td
+                {% if cell.colspan > 1 %}colspan="{{ cell.colspan }}"{% endif %}
+                {% if cell.rowspan > 1 %}rowspan="{{ cell.rowspan }}"{% endif %}
+                class="cell-align-{{ cell.align }}"
+                {% if cell.style %}style="{{ cell.style }}"{% endif %}
+            >
+                {% with para={'content': cell.content} %}{% include 'components/_inline.html' %}{% endwith %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{# ── Table Footnotes ── #}
+{% if table.footnotes %}
+<div class="table-footnotes">
+    {% for fn in table.footnotes %}
+        {% for fn_p in fn.paragraphs %}
+        <p>{% with para={'content': fn_p} %}{% include 'components/_inline.html' %}{% endwith %}</p>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endif %}
+
+</div>

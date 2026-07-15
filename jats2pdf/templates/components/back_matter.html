@@ -1,0 +1,31 @@
+{# ── Back Matter: Conclusions, Ethics, Funding, etc. ── #}
+
+{% for section in article.back.sections %}
+<div class="back-section">
+    {% with sec=section %}
+        {% include 'components/_section.html' %}
+    {% endwith %}
+</div>
+{% endfor %}
+
+{# ── Acknowledgments ── #}
+{% if article.back.acknowledgments %}
+<div class="back-section">
+    <h2 class="section-title">Acknowledgments</h2>
+    {% for para in article.back.acknowledgments %}
+    <p>{% include 'components/_inline.html' with context %}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Supplementary Materials ── #}
+{% if article.back.supplementary_materials %}
+<div class="supplementary-material">
+    <p>Supplementary material associated with this article can be found online.</p>
+    {% for sm in article.back.supplementary_materials %}
+    <p>Supplementary files: {{ sm.href }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Publisher Notes (now shown in first-page header band) ── #}

@@ -1,0 +1,32 @@
+{# ── Abstract Section (single flowing paragraph, no sub-headings) ── #}
+
+{% set abstract = article.front.abstract %}
+
+{% if abstract and abstract.sections %}
+<div class="abstract">
+    <div class="abstract-title">Abstract</div>
+
+    {% for sec in abstract.sections %}
+        {% for para_nodes in sec.paragraphs %}
+        <p>
+            {%- if sec.title -%}<span class="abstract-section-title">{{ sec.title }}: </span>{%- endif -%}
+            {%- with nodes=para_nodes -%}{%- include 'components/_inline.html' -%}{%- endwith -%}
+        </p>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Keywords ── #}
+{% if article.front.keywords %}
+<div class="keywords">
+    {% for kg in article.front.keywords %}
+    <span class="keyword-label">Keywords: </span>
+    <span class="keyword-list">
+        {% for kw in kg.keywords %}
+        <span class="keyword-item">{{ kw }}{% if not loop.last %}; {% endif %}</span>
+        {% endfor %}
+    </span>
+    {% endfor %}
+</div>
+{% endif %}

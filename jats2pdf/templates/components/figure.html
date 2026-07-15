@@ -1,0 +1,33 @@
+{# ── Figure Renderer ── #}
+{# Expected context: 'fig' = Figure object, 'figure_uris' = dict mapping graphic_id -> data: URI #}
+
+<div class="figure" id="{{ fig.id }}">
+
+{# ── Figure Label ── #}
+<div class="figure-label">{{ fig.label }}</div>
+
+{# ── Figure Image ── #}
+{% if fig.graphic_href %}
+    {% set img_src = None %}
+    {% if figure_uris and fig.graphic_href in figure_uris %}
+        {% set img_src = figure_uris[fig.graphic_href] %}
+    {% endif %}
+    {% if img_src %}
+    <img src="{{ img_src }}" alt="{{ fig.label }}" />
+    {% else %}
+    <div style="border:1px dashed #ccc; padding:20pt; text-align:center; color:#999;">
+        [Figure: {{ fig.graphic_href }}]
+    </div>
+    {% endif %}
+{% endif %}
+
+{# ── Figure Caption ── #}
+{% if fig.caption %}
+<div class="figure-caption">
+    {% for cap_p in fig.caption %}
+    <p>{% with para={'content': cap_p} %}{% include 'components/_inline.html' %}{% endwith %}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+</div>

@@ -1,0 +1,84 @@
+{# ── Reference List ── #}
+
+{% if article.back.references %}
+<div class="ref-list">
+    <h2 class="ref-list-title">References</h2>
+
+    {% for ref in article.back.references %}
+    <div class="ref-entry">
+        <span class="ref-label">{{ ref.label }}</span>
+        {% if ref.citation %}
+            {# ── Authors ── #}
+            {% if ref.citation.authors %}
+                {% for author in ref.citation.authors[:6] %}
+                    {% if author.lower() == 'et al.' %}
+                        et al.
+                    {% else %}
+                        {% set parts = author.split() %}
+                        {% if parts|length >= 2 %}
+                            {{ parts[0] }} {{ parts[1:]|map('first')|join('') }}
+                        {% else %}
+                            {{ author }}
+                        {% endif %}
+                    {% endif %}
+                    {% if not loop.last %}, {% endif %}
+                {% endfor %}
+                {% if ref.citation.authors|length > 6 %}et al.{% endif %}
+                .
+            {% endif %}
+
+            {# ── Title ── #}
+            {% if ref.citation.article_title %}
+                {{ ref.citation.article_title }}.
+            {% endif %}
+
+            {# ── Source ── #}
+            {% if ref.citation.source %}
+                <i>{{ ref.citation.source }}</i>.
+            {% endif %}
+
+            {# ── Year ── #}
+            {% if ref.citation.year %}
+                {{ ref.citation.year }}.
+            {% endif %}
+
+            {# ── Volume ── #}
+            {% if ref.citation.volume %}
+                {{ ref.citation.volume }}
+            {% endif %}
+
+            {# ── Pages ── #}
+            {% if ref.citation.first_page %}
+                : {{ ref.citation.first_page }}
+                {% if ref.citation.last_page %}&#x2013;{{ ref.citation.last_page }}{% endif %}.
+            {% endif %}
+
+            {# ── Edition ── #}
+            {% if ref.citation.edition %}
+                {{ ref.citation.edition }} edn.
+            {% endif %}
+
+            {# ── Publisher (books) ── #}
+            {% if ref.citation.publisher_name %}
+                {% if ref.citation.publisher_loc %}{{ ref.citation.publisher_loc }}: {% endif %}{{ ref.citation.publisher_name }}.
+            {% endif %}
+
+            {# ── DOI / URL ── #}
+            {% if ref.citation.doi_href %}
+                <a class="ref-doi-link" href="{{ ref.citation.doi_href }}">{{ ref.citation.doi_href }}</a>
+            {% elif ref.citation.ext_link_href %}
+                <a class="ref-doi-link" href="{{ ref.citation.ext_link_href }}">{{ ref.citation.ext_link_href }}</a>
+            {% endif %}
+
+            {# ── Web citation details ── #}
+            {% if ref.citation.comment %}
+                {{ ref.citation.comment }}
+            {% endif %}
+            {% if ref.citation.date_in_citation %}
+                {{ ref.citation.date_in_citation }}
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

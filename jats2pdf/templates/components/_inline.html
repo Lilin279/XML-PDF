@@ -1,0 +1,31 @@
+{# ── Inline Content Renderer (whitespace-controlled) ── #}
+{%- set items = nodes if nodes is defined else para.content -%}
+{%- for node in items -%}
+    {%- if node.__class__.__name__ == 'InlineText' -%}
+        {{ node.text }}
+    {%- elif node.__class__.__name__ == 'InlineItalic' -%}
+        <span class="text-italic">{%- with nodes=node.children -%}{%- include 'components/_inline.html' -%}{%- endwith -%}</span>
+    {%- elif node.__class__.__name__ == 'InlineBold' -%}
+        <span class="text-bold">{%- with nodes=node.children -%}{%- include 'components/_inline.html' -%}{%- endwith -%}</span>
+    {%- elif node.__class__.__name__ == 'InlineSup' -%}
+        <span class="text-sup">{%- with nodes=node.children -%}{%- include 'components/_inline.html' -%}{%- endwith -%}</span>
+    {%- elif node.__class__.__name__ == 'InlineSub' -%}
+        <span class="text-sub">{%- with nodes=node.children -%}{%- include 'components/_inline.html' -%}{%- endwith -%}</span>
+    {%- elif node.__class__.__name__ == 'InlineXref' -%}
+        {%- if node.ref_type == 'bibr' -%}
+            <span class="xref xref-bibr">{{ node.text }}</span>
+        {%- elif node.ref_type == 'table' -%}
+            <span class="xref xref-table">{{ node.text }}</span>
+        {%- elif node.ref_type == 'fig' -%}
+            <span class="xref xref-fig">{{ node.text }}</span>
+        {%- else -%}
+            <span class="xref">{{ node.text }}</span>
+        {%- endif -%}
+    {%- elif node.__class__.__name__ == 'InlineFormula' -%}
+        {{ node.mathml | safe }}
+    {%- elif node.__class__.__name__ == 'InlineExtLink' -%}
+        <a class="ext-link" href="{{ node.href }}">{{ node.text }}</a>
+    {%- elif node.__class__.__name__ == 'InlineBreak' -%}
+        <br>
+    {%- endif -%}
+{%- endfor -%}

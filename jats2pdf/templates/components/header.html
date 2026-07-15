@@ -1,0 +1,90 @@
+{# ── Article Header: Journal info → Article Type → Title → Authors → Affiliations → Corresp → Editor → Dates ── #}
+
+{% set fm = article.front %}
+{% set jm = fm.journal_meta %}
+
+{% set months = {'1': 'January', '2': 'February', '3': 'March', '4': 'April',
+                 '5': 'May', '6': 'June', '7': 'July', '8': 'August',
+                 '9': 'September', '10': 'October', '11': 'November', '12': 'December'} %}
+
+{# ── Get DOI ── #}
+{% set doi_val = namespace(val='') %}
+{% for aid in fm.article_ids %}
+    {% if aid.id_type == 'doi' %}{% set doi_val.val = aid.value %}{% endif %}
+{% endfor %}
+
+{# ── Get pub year ── #}
+{% set pub_year = namespace(val='') %}
+{% for pd in fm.pub_dates %}
+    {% if pd.pub_type == 'epub' %}{% set pub_year.val = pd.year %}{% endif %}
+{% endfor %}
+{% if not pub_year.val %}
+    {% for pd in fm.pub_dates %}{% set pub_year.val = pd.year %}{% endfor %}
+{% endif %}
+
+<div class="first-page-header">
+
+{# ── 1. Article Type ── #}
+{% if fm.article_type %}
+<div class="article-type-badge">{{ fm.article_type }}</div>
+{% endif %}
+
+{# ── 2. Article Title ── #}
+<h1 class="article-title">{{ fm.article_title }}</h1>
+
+{# ── 3. Authors (superscripts tight, no ORCID) ── #}
+<div class="author-list">
+    {% for author in fm.authors %}
+    {% if author.orcid %}<a class="orcid-link" href="{{ author.orcid }}" target="_blank">{% endif %}
+    <span class="author-name">{{ author.given_names }} {{ author.surname }}</span>{% if author.orcid %}</a>{% endif %}
+    {% if author.aff_refs %}<span class="author-aff-marks">{% for ref in author.aff_refs %}{% for aff in fm.affiliations %}{% if aff.id == ref %}{{ aff.label }}{% endif %}{% endfor %}{% if not loop.last %},{% endif %}{% endfor %}</span>{% endif %}{% if author.is_corresponding %}<span class="author-corresp-mark">,*</span>{% endif %}{% if not loop.last %}<span class="author-separator">, </span>{% endif %}
+    {% endfor %}
+</div>
+
+{# ── 4. Affiliations ── #}
+<div class="affiliations">
+    {% for aff in fm.affiliations %}
+    <div class="affiliation">
+        <span class="aff-label">{{ aff.label }}</span>{{ aff.text }}
+    </div>
+    {% endfor %}
+</div>
+
+{# ── 5. Correspondence ── #}
+{% if fm.corresponding %}
+<div class="correspondence">
+    <span class="corresp-label">{{ fm.corresponding.label }}</span>Correspondence:
+    {% for i in range(fm.corresponding.emails|length) %}
+    <a href="mailto:{{ fm.corresponding.emails[i] }}">{{ fm.corresponding.emails[i] }}</a>{% if i < fm.corresponding.authors|length and fm.corresponding.authors[i] %} ({{ fm.corresponding.authors[i] }}){% endif %}{% if not loop.last %}; {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── 6. Academic Editor ── #}
+{% if fm.editors %}
+<div class="editor-info">
+    {% for editor in fm.editors %}
+    <span>Academic Editor: {{ editor.given_names }} {{ editor.surname }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── 7. Submitted/Revised/Accepted timeline ── #}
+<div class="history-dates">
+    {% for h in fm.history %}
+        {% if h.date_type == 'received' %}
+            Submitted: {% if h.day %}{{ h.day }} {% endif %}{{ months.get(h.month, h.month) }} {{ h.year }}
+        {% elif h.date_type == 'rev-recd' %}
+            &nbsp; Revised: {% if h.day %}{{ h.day }} {% endif %}{{ months.get(h.month, h.month) }} {{ h.year }}
+        {% elif h.date_type == 'accepted' %}
+            &nbsp; Accepted: {% if h.day %}{{ h.day }} {% endif %}{{ months.get(h.month, h.month) }} {{ h.year }}
+        {% endif %}
+    {% endfor %}
+    {% for pd in fm.pub_dates %}
+        {% if pd.pub_type == 'epub' %}
+            &nbsp; Published: {% if pd.day %}{{ pd.day }} {% endif %}{{ months.get(pd.month, pd.month) }} {{ pd.year }}
+        {% endif %}
+    {% endfor %}
+</div>
+
+</div>

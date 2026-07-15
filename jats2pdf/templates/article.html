@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ article.front.article_title }}</title>
+    <style>
+        {% include 'css/journal.css' %}
+    </style>
+</head>
+<body>
+
+{# ── ARTICLE METADATA: single column, full width ── #}
+<div class="single-column-front">
+{% include 'components/header.html' %}
+{% include 'components/abstract.html' %}
+</div>
+
+{# ── BODY + BACK SECTIONS + REFERENCES: two columns ── #}
+<div class="two-column-body">
+{% include 'components/body.html' %}
+{% include 'components/back_matter.html' %}
+{% include 'components/references.html' %}
+</div>
+
+</body>
+</html>
